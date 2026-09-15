@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Capacidad de Pago</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,Helvetica,sans-serif;background:#f3f6f9;color:#1f2937;min-height:100vh}
+.header{background:linear-gradient(135deg,#0b3a5b,#12608f);color:#fff;padding:28px 20px;box-shadow:0 3px 10px rgba(0,0,0,.12)}
+.header-content{max-width:1100px;margin:auto}
+.header h1{font-size:27px;margin-bottom:8px}.header p{font-size:14px;opacity:.9}
+.container{max-width:1100px;margin:30px auto;padding:0 20px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.card{background:#fff;border-radius:12px;padding:25px;box-shadow:0 4px 15px rgba(0,0,0,.07);border:1px solid #e5e7eb}
+.card h2{font-size:19px;color:#0b3a5b;margin-bottom:22px;padding-bottom:12px;border-bottom:2px solid #edf2f7}
+.field{margin-bottom:22px}.field label{display:block;font-weight:bold;margin-bottom:7px;font-size:14px}
+.help{font-size:12px;color:#6b7280;line-height:1.45;margin-bottom:8px}
+.input-wrapper{position:relative}.currency{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#6b7280;font-weight:bold}
+input{width:100%;padding:12px 12px 12px 35px;border:1px solid #cbd5e1;border-radius:7px;font-size:16px;outline:none;transition:.2s}
+input:focus{border-color:#12608f;box-shadow:0 0 0 3px rgba(18,96,143,.12)}
+.limit-box{background:#f0f7fb;border-left:4px solid #12608f;padding:14px;border-radius:6px;margin-top:5px;font-size:13px;line-height:1.5}
+.button{width:100%;border:none;background:#0b3a5b;color:#fff;padding:14px;border-radius:7px;font-size:16px;font-weight:bold;cursor:pointer;transition:.2s}
+.button:hover{background:#082d46}.results{grid-column:1/-1}.result-main{display:grid;grid-template-columns:1fr 1fr 1fr;gap:15px;margin-bottom:25px}
+.metric{background:#f8fafc;border:1px solid #e5e7eb;border-radius:9px;padding:18px;text-align:center}
+.metric-title{font-size:12px;color:#64748b;margin-bottom:8px;text-transform:uppercase;letter-spacing:.4px}
+.metric-value{font-size:25px;font-weight:bold;color:#0b3a5b}
+.status{padding:22px;border-radius:10px;text-align:center;border:2px solid}.status.approved{background:#ecfdf3;border-color:#16a34a;color:#166534}.status.rejected{background:#fef2f2;border-color:#dc2626;color:#991b1b}
+.status-icon{font-size:42px;margin-bottom:8px}.status h3{font-size:25px;margin-bottom:8px}.status p{font-size:14px}
+.details{margin-top:20px}.details table{width:100%;border-collapse:collapse}.details th,.details td{padding:12px;border-bottom:1px solid #e5e7eb;text-align:left;font-size:14px}.details th{background:#f8fafc;color:#475569}
+.progress-container{margin-top:22px}.progress-label{display:flex;justify-content:space-between;font-size:13px;margin-bottom:7px;font-weight:bold}
+.progress{height:14px;background:#e5e7eb;border-radius:20px;overflow:hidden}.progress-bar{height:100%;width:0;transition:width .5s ease}
+.footer-note{text-align:center;color:#64748b;font-size:11px;margin-top:25px;line-height:1.5}.hidden{display:none}
+.warning{color:#b45309;font-size:12px;margin-top:6px;display:none}
+@media(max-width:800px){.grid{grid-template-columns:1fr}.result-main{grid-template-columns:1fr}.results{grid-column:auto}}
+</style>
+</head>
+<body>
+<header class="header"><div class="header-content">
+<h1>Calculadora de Capacidad de Pago</h1>
+<p>Herramienta de apoyo para el análisis preliminar de riesgo crediticio</p>
+</div></header>
+
+<main class="container">
+<div class="grid">
+
+<section class="card">
+<h2>Información financiera</h2>
+
+<div class="field">
+<label for="income">Ingreso Mensual Neto</label>
+<div class="help">Ingrese el ingreso mensual neto verificable del cliente, después de descuentos obligatorios y otras deducciones aplicables. Utilice el ingreso que corresponda según las políticas internas de evaluación crediticia.</div>
+<div class="input-wrapper"><span class="currency">$</span><input type="number" id="income" min="0" step="0.01" placeholder="Ej. 1500.00"></div>
+<div id="incomeWarning" class="warning">El ingreso debe ser mayor que cero.</div>
+</div>
+
+<div class="field">
+<label for="currentDebt">Obligaciones Actuales</label>
+<div class="help">Incluya la suma de las cuotas mensuales de las obligaciones crediticias vigentes del cliente: préstamos personales, tarjetas de crédito, autos, hipotecas y otras obligaciones que deban considerarse según la política del banco.</div>
+<div class="input-wrapper"><span class="currency">$</span><input type="number" id="currentDebt" min="0" step="0.01" placeholder="Ej. 300.00"></div>
+</div>
+
+<div class="field">
+<label for="newLoan">Cuota del Nuevo Préstamo</label>
+<div class="help">Ingrese la cuota mensual estimada del nuevo préstamo que se está evaluando, incluyendo los componentes que deban formar parte del servicio mensual de la deuda según las políticas crediticias.</div>
+<div class="input-wrapper"><span class="currency">$</span><input type="number" id="newLoan" min="0" step="0.01" placeholder="Ej. 150.00"></div>
+</div>
+
+<div class="limit-box"><strong>Límite de endeudamiento: 30%</strong><br>
+La suma de las obligaciones actuales más la cuota del nuevo préstamo no debe superar el 30% del ingreso mensual neto para que el resultado sea considerado aprobado bajo este criterio.</div>
+<br><button class="button" onclick="calcular()">Calcular Capacidad de Pago</button>
+</section>
+
+<section class="card">
+<h2>Regla de evaluación</h2>
+<div class="limit-box"><strong>Fórmula utilizada</strong><br><br>
+Endeudamiento = (Obligaciones actuales + Cuota nuevo préstamo) ÷ Ingreso mensual neto × 100</div>
+<br>
+<div class="details"><table>
+<tr><th>Indicador</th><th>Criterio</th></tr>
+<tr><td>Endeudamiento ≤ 30%</td><td>Aprobado</td></tr>
+<tr><td>Endeudamiento &gt; 30%</td><td>Rechazado</td></tr>
+</table></div>
+<div class="help" style="margin-top:20px"><strong>Importante:</strong> este cálculo constituye una herramienta de apoyo para el análisis. La decisión crediticia final debe considerar las demás políticas, parámetros, validaciones y criterios de riesgo establecidos por la institución.</div>
+</section>
+
+<section id="results" class="card results hidden">
+<h2>Resultado del análisis</h2>
+<div class="result-main">
+<div class="metric"><div class="metric-title">Endeudamiento Actual</div><div class="metric-value" id="currentRatio">0.00%</div></div>
+<div class="metric"><div class="metric-title">Endeudamiento con Nuevo Préstamo</div><div class="metric-value" id="newRatio">0.00%</div></div>
+<div class="metric"><div class="metric-title">Capacidad Disponible</div><div class="metric-value" id="availableCapacity">$0.00</div></div>
+</div>
+
+<div id="statusBox" class="status">
+<div id="statusIcon" class="status-icon"></div><h3 id="statusTitle"></h3><p id="statusMessage"></p>
+</div>
+
+<div class="progress-container">
+<div class="progress-label"><span>Nivel de endeudamiento</span><span id="progressText">0.00%</span></div>
+<div class="progress"><div id="progressBar" class="progress-bar"></div></div>
+</div>
+
+<div class="details"><table>
+<tr><th>Concepto</th><th>Valor</th></tr>
+<tr><td>Ingreso mensual neto</td><td id="detailIncome">$0.00</td></tr>
+<tr><td>Obligaciones actuales</td><td id="detailDebt">$0.00</td></tr>
+<tr><td>Cuota nuevo préstamo</td><td id="detailNewLoan">$0.00</td></tr>
+<tr><td><strong>Total obligaciones</strong></td><td><strong id="detailTotal">$0.00</strong></td></tr>
+<tr><td>Límite máximo permitido (30%)</td><td id="detailLimit">$0.00</td></tr>
+</table></div>
+</section>
+</div>
+
+<div class="footer-note">Calculadora de apoyo al análisis crediticio. El resultado no constituye por sí mismo una aprobación o rechazo definitivo del crédito.</div>
+</main>
+
+<script>
+const LIMITE_ENDEUDAMIENTO = 0.30;
+
+function formatoMoneda(valor){
+return valor.toLocaleString("es-PA",{style:"currency",currency:"USD",minimumFractionDigits:2});
+}
+
+function calcular(){
+const income=parseFloat(document.getElementById("income").value)||0;
+const currentDebt=parseFloat(document.getElementById("currentDebt").value)||0;
+const newLoan=parseFloat(document.getElementById("newLoan").value)||0;
+const warning=document.getElementById("incomeWarning");
+
+if(income<=0){warning.style.display="block";document.getElementById("income").focus();return}
+warning.style.display="none";
+
+if(currentDebt<0||newLoan<0){alert("Los valores de las obligaciones no pueden ser negativos.");return}
+
+const totalDebt=currentDebt+newLoan;
+const currentRatio=currentDebt/income;
+const newRatio=totalDebt/income;
+const maximumDebt=income*LIMITE_ENDEUDAMIENTO;
+const availableCapacity=maximumDebt-totalDebt;
+
+document.getElementById("results").classList.remove("hidden");
+document.getElementById("currentRatio").textContent=(currentRatio*100).toFixed(2)+"%";
+document.getElementById("newRatio").textContent=(newRatio*100).toFixed(2)+"%";
+document.getElementById("availableCapacity").textContent=formatoMoneda(Math.max(availableCapacity,0));
+document.getElementById("detailIncome").textContent=formatoMoneda(income);
+document.getElementById("detailDebt").textContent=formatoMoneda(currentDebt);
+document.getElementById("detailNewLoan").textContent=formatoMoneda(newLoan);
+document.getElementById("detailTotal").textContent=formatoMoneda(totalDebt);
+document.getElementById("detailLimit").textContent=formatoMoneda(maximumDebt);
+
+const statusBox=document.getElementById("statusBox");
+const statusIcon=document.getElementById("statusIcon");
+const statusTitle=document.getElementById("statusTitle");
+const statusMessage=document.getElementById("statusMessage");
+
+if(newRatio<=LIMITE_ENDEUDAMIENTO){
+statusBox.className="status approved";
+statusIcon.textContent="✓";
+statusTitle.textContent="APROBADO";
+statusMessage.textContent="El nivel de endeudamiento proyectado es de "+(newRatio*100).toFixed(2)+"% y se encuentra dentro del límite máximo permitido del 30%.";
+}else{
+statusBox.className="status rejected";
+statusIcon.textContent="✕";
+statusTitle.textContent="RECHAZADO";
+statusMessage.textContent="El nivel de endeudamiento proyectado es de "+(newRatio*100).toFixed(2)+"% y supera el límite máximo permitido del 30%.";
+}
+
+const visualPercentage=Math.min(newRatio*100,100);
+document.getElementById("progressBar").style.width=visualPercentage+"%";
+document.getElementById("progressText").textContent=(newRatio*100).toFixed(2)+"%";
+document.getElementById("results").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+document.addEventListener("keydown",function(event){
+if(event.key==="Enter"&&document.activeElement.tagName==="INPUT") calcular();
+});
+</script>
+</body>
+</html>
